@@ -1,12 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMenu, FiX, FiHome, FiSettings, FiUser, FiBell, FiLogOut, FiLogIn, FiMessageSquare } from 'react-icons/fi';
 import { useRouter } from 'next/navigation'; // For client-side navigation in Next.js
 import { FC, MouseEventHandler } from 'react';
 import Chat from '@/components/chat'; // Import Chatbot Component
 
-// Define Navbar Icon Props
+// Define Navbar Icon Props<AiOutlineLogout />
 interface NavbarIconProps {
   Icon: FC<any>;
   text: string;
@@ -35,9 +35,16 @@ export default function Navbar() {
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Manage auth state
   const router = useRouter();
 
+  useEffect(() => {
+    // Simulating user authentication check
+    const user = localStorage.getItem('user');
+    setIsAuthenticated(!!user);
+  }, []);
+
   const handleLogout = () => {
+    localStorage.removeItem('user');
     setIsAuthenticated(false);
-    router.push('/login'); // Redirect to login on logout
+    router.push('/login');
   };
 
   return (

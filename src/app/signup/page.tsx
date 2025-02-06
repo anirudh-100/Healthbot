@@ -1,4 +1,3 @@
-// pages/signup.tsx
 'use client';
 
 import { useState } from 'react';
@@ -8,33 +7,45 @@ export default function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     if (password !== confirmPassword) {
-      alert("Passwords don't match");
+      setError("Passwords don't match");
       return;
     }
 
-    // Add your sign-up logic here.
-    // Mock sign-up by storing the user in localStorage.
-    localStorage.setItem('isAuthenticated', 'true');
-    router.push('/dashboard'); // Redirect to dashboard after successful signup
+    try {
+      const response = await fetch("/api/signup", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.message || 'Signup failed');
+        return;
+      }
+
+      router.push('/login'); // Redirect to login after successful signup
+    } catch (error) {
+      setError('Something went wrong. Please try again.');
+    }
   };
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
-      <form
-        onSubmit={handleSignup}
-        className="bg-white p-8 rounded-lg shadow-md w-96"
-      >
+      <form onSubmit={handleSignup} className="bg-white p-8 rounded-lg shadow-md w-96">
         <h2 className="text-2xl font-semibold mb-4">Sign Up</h2>
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+
         <div className="mb-4">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            Email
-          </label>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
           <input
             type="email"
             id="email"
@@ -46,9 +57,7 @@ export default function Signup() {
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-            Password
-          </label>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
           <input
             type="password"
             id="password"
@@ -60,9 +69,7 @@ export default function Signup() {
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-            Confirm Password
-          </label>
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirm Password</label>
           <input
             type="password"
             id="confirmPassword"
@@ -73,10 +80,7 @@ export default function Signup() {
             required
           />
         </div>
-        <button
-          type="submit"
-          className="w-full py-2 mt-4 bg-blue-600 text-white rounded-md"
-        >
+        <button type="submit" className="w-full py-2 mt-4 bg-blue-600 text-white rounded-md">
           Sign Up
         </button>
       </form>
